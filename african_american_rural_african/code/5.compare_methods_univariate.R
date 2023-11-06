@@ -1,11 +1,12 @@
-############## Does alpha diversity change overtime in AFR
+############## Does alpha diversity change overtime in AFR?
 
-# Subset to nationality
+# Subset to nationality AFR
 meta_sub2 <- metadata %>% dplyr::filter(nationality == "AFR")
 
 # Mean at each timepoint
 meta_mean <- meta_sub2 %>% group_by(diet) %>% summarise(mean = mean(Shannon_Index), nationality = unique(nationality))
 
+# Visualize the data
 plot <- ggplot(meta_sub2, aes(x = diet, y = Shannon_Index)) +
   geom_jitter(position = position_jitter(width = 0.1), size = 1, alpha = 0.5, color = "black") +
   geom_violin(trim = TRUE, alpha = 0.5) +

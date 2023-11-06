@@ -1,11 +1,13 @@
-# Sett working directory
-setwd("~/Documents/codes/african_american_rural_african")
+# Setting working directory
+#setwd("~/Documents/codes/african_american_rural_african")
 
 # Get data
 # See https://joey711.github.io/phyloseq/
 data(dietswap, package = "microbiome")
 print(dietswap)
 
+# Relevant publication for this data:
+#https://www.nature.com/articles/ncomms7342
 
 # Add diet group to the metadata
 sample_data(dietswap)$diet <- paste0(sample_data(dietswap)$group, sample_data(dietswap)$timepoint.within.group)

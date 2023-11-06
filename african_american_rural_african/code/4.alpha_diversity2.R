@@ -1,3 +1,6 @@
+# In this script, I will use linear models/linear mixed effects models for comparing 
+# alpha diversity metrics between groups
+
 # Create output directory
 output_dir <- "Outputs/Alpha_Diversity_lm"
 dir.create(output_dir, recursive = T, showWarnings = F)
@@ -98,7 +101,7 @@ dev.off()
 
 # Additional note:
 # Time as a numeric value:
-# Not able to do pairwise comparison however using spline function we can see if slope changes at specific timepoints (knots)
+# Not able to do pairwise comparisons, however, with spline function we can see if the slope changes at a specific timepoint (knots)
 # https://cran.r-project.org/web/packages/lspline/vignettes/lspline.html
 # Example:
 alpha = "Shannon_Index"
@@ -114,7 +117,7 @@ permu_result <- permuspliner(data = metadata, xvar = "timepoint", yvar = "Shanno
 permuspliner.plot.permdistance(permu_result, xlabel="timepoint")
 permuspliner.plot.permsplines(permu_result, xvar="timepoint", yvar="Shannon_Index")
 
-# Trend over time
+# Trend over time for each group
 trend_results <- trendyspliner(data = metadata, xvar = "timepoint", yvar = "Shannon_Index",cases = "subject",category = "nationality",group = "AAM",
                                perms = 999, retain_perm = T,mean_center=F)
 trendyspliner.plot.perms(trend_results, xlabel = 'timepoint', ylabel = 'Shannon_Index')
