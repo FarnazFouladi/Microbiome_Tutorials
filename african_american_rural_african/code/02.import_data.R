@@ -1,5 +1,5 @@
 # Setting working directory
-#setwd("~/Documents/codes/african_american_rural_african")
+#setwd("~/Documents/codes/Microbiome_Tutorials/african_american_rural_african")
 
 # Get data
 # See https://joey711.github.io/phyloseq/

@@ -75,7 +75,7 @@ dev.off()
 taxa_meta_merged <- t(bias_corrected_df) %>%
   as.data.frame() %>%
   rownames_to_column("sample") %>%
-  left_join(meta(phy_sub1))
+  dplyr::left_join(meta(phy_sub1))
 
 boxplots <- lapply(as.character(res1_sig$taxon), function(taxon) {
   # Create a dataframe to include p-values
@@ -129,19 +129,22 @@ for (nt in c("AAM", "AFR")) {
       ),
       node = list(5, 5),
       solver = "ECOS",
-      B = 10
+      B = 10 # Increase for real data
     )
   )
 
   outputs_list[[nt]] <- diff_out2
 }
 
+#saveRDS(outputs_list,file = file.path(output_dir,"ancombc2_outputs.rds"))
+outputs_list <- readRDS(file.path(output_dir,"ancombc2_outputs.rds"))
+
 ## Extract results:
 
 # Bias corrected abundance
 bias_corrected_df <- outputs_list[["AAM"]]$bias_correct_log_table %>%
   rownames_to_column("taxon") %>%
-  full_join(outputs_list[["AFR"]]$bias_correct_log_table %>% rownames_to_column("taxon")) %>%
+  dplyr::full_join(outputs_list[["AFR"]]$bias_correct_log_table %>% rownames_to_column("taxon")) %>%
   column_to_rownames("taxon")
 
 # Replace NAs with minimum + minimum/2
@@ -234,7 +237,7 @@ dev.off()
 taxa_meta_merged <- t(bias_corrected_df) %>%
   as.data.frame() %>%
   rownames_to_column("sample") %>%
-  left_join(meta(dietswap))
+  dplyr::left_join(meta(dietswap))
 
 boxplots <- lapply(as.character(dunn_sig$taxon), function(taxon) {
   # Subset to taxon
@@ -246,7 +249,7 @@ boxplots <- lapply(as.character(dunn_sig$taxon), function(taxon) {
   pval_tmp <- taxa_meta_sub %>%
     group_by(nationality) %>%
     get_y_position(formula = taxon ~ diet, ref.group = "ED1") %>%
-    left_join(dunn_sig_sub) %>%
+    dplyr::left_join(dunn_sig_sub) %>%
     filter(!is.na(p_sig) & p_sig != "ns")
 
 
