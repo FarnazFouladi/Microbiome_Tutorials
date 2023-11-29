@@ -28,7 +28,7 @@ diff_out1 <- ancombc2(
 # Bias corrected abundances
 bias_corrected_df <- diff_out1$bias_correct_log_table
 
-# Replace NAs with the minimum plus half of the minimum
+# Replace NAs with the minimum plus half of the minimum (This table will be used for only visualization)
 bias_corrected_df <- apply(bias_corrected_df, 2, function(x) {
   x[is.na(x)] <- min(x, na.rm = T) + (min(x, na.rm = T) / 2)
   return(x)

@@ -1,6 +1,9 @@
 # Compare different beta diversity metrics
 # Compare NMDS versus MDS
 
+# Output directory
+output_dir <- "Outputs/Beta_Diversity"
+
 
 library(mia)
 # https://www.bioconductor.org/packages/devel/bioc/vignettes/mia/inst/doc/mia.html#merging-and-agglomeration-based-on-taxonomic-information.
@@ -26,12 +29,17 @@ otu_relab1 <- otu_relab
 otu_relab1 <- otu_relab1 + min(otu_relab1[otu_relab1 != 0]) / 2
 otu_clr <- vegan::decostand(otu_relab1, MARGIN = 2, method = "clr")
 
+
+# colors
+cols_sampletypes <- c("#FF7F00","#A6CEE3","#1F78B4","grey", "#023858","#B30000","#6A3D9A","#B15928","#FB9A99")
+
 ################
 # Beta diversity
 ################
 
 # Functions to perform MDS (Principal Coordinate Analysis)
-pcoa_function <- function(dist_df = bc, meta_df = meta, group = "SampleType", distance_metric = "Bray Curtis Dissimilarity") {
+# Difference between pcoa and pco? Distance matrix versus covariance matrix
+pcoa_function <- function(dist_df, meta_df = meta, group = "SampleType", distance_metric = "Bray Curtis Dissimilarity") {
   # Principal coordinate analysis
   pco <- ape::pcoa(dist_df)
   pco_df <- data.frame(PC1 = pco$vectors[, 1], PC2 = pco$vectors[, 2])
@@ -42,13 +50,14 @@ pcoa_function <- function(dist_df = bc, meta_df = meta, group = "SampleType", di
 
   # Plot
   plot_beta <- ggplot(data = pco_df, aes(PC1, PC2, color = .data[[group]])) +
-    geom_point(alpha = 0.5, size = 3) +
+    geom_point(alpha = 0.8, size = 3) +
     theme_classic() +
     # scale_color_brewer(palette = "Dark2") +
     labs(
       x = paste0("PC1 ", "(", eig_vals["PC1"], "%", ")"), y = paste0("PC2 ", "(", eig_vals["PC2"], "%", ")"),
       title = distance_metric
-    )
+    )+
+    scale_color_manual(values = cols_sampletypes)
 
   return(list(plot_beta, pco))
 }
@@ -60,7 +69,7 @@ pcoa_function <- function(dist_df = bc, meta_df = meta, group = "SampleType", di
 # Arranges points to maximize rank-order correlation between real-world distance and ordination space distance
 # Goodness of fit is measured by stress (the disagreement between observed distances and fitted distances in the reduced dimension)
 #
-nmds_function <- function(dist_df = dist_btw, meta_df = meta, group = "SampleType", distance_metric = "Bray Curtis Dissimilarity") {
+nmds_function <- function(dist_df , meta_df = meta, group = "SampleType", distance_metric = "Bray Curtis Dissimilarity") {
   # nonmetric multidimensional scaling
   pco <- vegan::metaMDS(dist_df, k = 2, autotransform = F)
   pco_df <- data.frame(PC1 = pco$points[, 1], PC2 = pco$points[, 2])
@@ -69,13 +78,14 @@ nmds_function <- function(dist_df = dist_btw, meta_df = meta, group = "SampleTyp
 
   # Plot
   plot_beta <- ggplot(data = pco_df, aes(PC1, PC2, color = .data[[group]])) +
-    geom_point(alpha = 0.5, size = 3) +
+    geom_point(alpha = 0.8, size = 3) +
     theme_classic() +
     # scale_color_brewer(palette = "Dark2") +
     labs(
       x = "NMDS-1", y = "NMDS-2",
       title = distance_metric
-    )
+    )+
+    scale_color_manual(values = cols_sampletypes)
 
   return(list(plot_beta, pco))
 }
@@ -107,9 +117,6 @@ calculate_stress <- function(d0 = as.matrix(bc), dp = pcoa_bc_dist) {
 
   return(plot)
 }
-
-
-
 
 
 # 1. Bray-Curtis distance
