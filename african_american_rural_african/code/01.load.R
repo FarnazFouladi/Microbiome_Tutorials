@@ -7,6 +7,7 @@ library(gridExtra)
 library(vegan)
 library(rstatix)
 library(ANCOMBC)
+library(mia)
 
 # Functions
 get_upper_tri = function(cormat){

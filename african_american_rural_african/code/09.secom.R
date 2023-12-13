@@ -9,7 +9,7 @@ plot_list <- list()
 
 for (nt in c("AAM", "AFR")) {
   # Subset to nationality
-  phy_sub <- subset_samples(dietswap, nationality == nt & Diet == "ED1")
+  phy_sub <- subset_samples(dietswap, nationality == nt & diet == "ED1")
 
   set.seed(123)
   ## Linear relationships
@@ -198,7 +198,7 @@ for (nt in c("AAM", "AFR")) {
     assay_name = c(rep("counts", 6)),
     tax_level = c(rep("Phylum", 6)),
     pseudo = 0,
-    prv_cut = 0.2, lib_cut = 1000, corr_cut = 0.5,
+    prv_cut = 0.5, lib_cut = 1000, corr_cut = 0.5,
     wins_quant = c(0.05, 0.95), R = 1000,
     thresh_hard = 0.3, max_p = 0.005, n_cl = 2
   )
@@ -297,3 +297,8 @@ dev.off()
 pdf(file.path(output_dir, "AFR_secom.pdf"), 20, 20)
 ggpubr::ggarrange(plot_list[[3]], plot_list[[4]], nrow = 1, ncol = 2)
 dev.off()
+
+
+
+
+

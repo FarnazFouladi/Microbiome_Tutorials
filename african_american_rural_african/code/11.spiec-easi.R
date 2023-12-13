@@ -1,8 +1,16 @@
+# Running Spiec-Easi for the example dataset and Constructing networks
+library(NetCoMi)
+
 #### Analysis 1:
+# Comparing the microbial networks between AAM and AFR
+
+# Creating an output directory
+output_dir <- "Outputs/Network_Analysis"
+dir.create(file.path(output_dir))
 
 # Subset to AAM and AFC
 
-# Subset to nationality
+# Subset to each nationality
 phy_sub_aam <- subset_samples(dietswap, nationality == "AAM" & diet == "ED1" )
 phy_sub_afr <- subset_samples(dietswap, nationality == "AFR" & diet == "ED1")
 
@@ -16,13 +24,17 @@ n_sample <- nsamples(phy_sub_afr)
 # Network construction
 net_nationaity <- netConstruct(data = phy_sub_aam, 
                            data2 = phy_sub_afr,  
-                           filtTax = "highestVar",
-                           filtTaxPar = list(highestVar = 50),
-                           #filtSamp = "highestFreq",
-                           #filtSampPar = list(highestFreq = n_sample),
+                           #filtTax = "highestVar", # Keep the 50 taxa with highest variance
+                           #filtTaxPar = list(highestVar = 50),
+                           #filtSamp = "totalReads",
+                           #filtSampPar = list(filtSamp = 1000),
                            taxRank= "Genus",
-                           measure = "spieceasi", #methods: "pearson", "spearman", "bicor", "sparcc", "cclasso", "ccrepe", "spieceasi" (default), "spring", "gcoda" and "propr" 
-                           measurePar = list(method='mb', lambda.min.ratio=1e-2, nlambda=15),
+                           measure = "spieceasi", 
+                           measurePar = list(method='mb'), # lambda.min.ratio=1e-2, nlambda=15),
+                           #measure = "spring",
+                           #measurePar = list(nlambda=10, 
+                           #                 rep.num=10),
+                           #
                            #normMethod = "none", 
                            #zeroMethod = "none",
                            #sparsMethod = "none", 
@@ -33,7 +45,7 @@ net_nationaity <- netConstruct(data = phy_sub_aam,
 # Network comparison
 props_nationality <- netAnalyze(net_nationaity, 
                            centrLCC = TRUE,
-                           sPathNorm = FALSE,
+                           sPathNorm = FALSE, #the shortest path is the minimum sum of dissimilarities between two nodes.
                            clustMethod = "cluster_fast_greedy",
                            hubPar = c("degree", "eigenvector"),
                            hubQuant = 0.9)
@@ -41,18 +53,29 @@ props_nationality <- netAnalyze(net_nationaity,
 summary(props_nationality)
 
 
-pdf(file.path(output_dir,"spieceasi_network.pdf"),50,40)
+pdf(file.path(output_dir,"spieceasi_network.pdf"),60,40)
 plot(props_nationality, 
      sameLayout = TRUE, 
      repulsion = 0.95,
+     shortenLabels = "simple",
+     labelLength = 15,
+     charToRm = "et rel.",
      layoutGroup = "union",
      rmSingles = "inboth", 
      nodeSize = "mclr", 
+     #nodeSizeSpread = 3,
+     nodeColor = "cluster",
+     sameClustCol = TRUE,
      labelScale = FALSE,
+     labelFont=0.8,
      cexNodes = 1.5, 
      cexLabels = 2.5,
      cexHubLabels = 3,
      cexTitle = 3.8,
+     #nodeFilter = "clustMin", 
+     #nodeFilterPar = 20, 
+     #edgeInvisFilter = "threshold",
+     #edgeInvisPar = 0.1,
      groupNames = c("AAM", "AFR"),
      hubBorderCol  = "gray40")
 
@@ -73,9 +96,10 @@ summary(comp_nationality,
         showCentr = c("degree", "between", "closeness"), 
         numbNodes = 5)
 
-# Differential network construction
+# Differential association
 diff_nationality <- diffnet(net_nationaity,
-                       diffMethod = "fisherTest",alpha = 0.9,
+                       diffMethod = "discordant",#lfdrThresh=0.2,
+                       #diffMethod = "fisherTest",
                        adjust = "lfdr")
 
 
@@ -84,19 +108,37 @@ plot(diffnet_nationaity)
 # For unadjusted p-value
 plot(diff_nationality, adjusted = FALSE,
      mar = c(2, 2, 5, 15), legendPos = c(1.2,1.2),
+     labelFont=1.5,
+     cexLabels = 0.4,
+     labelScale = FALSE,
      legendArgs = list(bty = "n"),
      legendGroupnames = c("AAM", "AFR"),
      legendTitle = "Correlations:")
 
 
+# Show only taxa with association difference more than 0.2
+diff_mat <- diff_nationality$diffMat
+diff_taxa <- rownames(diff_mat)[rowSums(diff_mat>0.2)>0]
 
-
-
-
-
-
-
-
+pdf(file.path(output_dir,"spieceasi_network_diff.pdf"),60,40)
+plot(props_nationality, 
+     nodeFilter = "names",
+     nodeFilterPar = diff_taxa,
+     nodeColor = "gray",
+     cexNodes = 1.5, 
+     cexLabels = 3,
+     cexTitle = 3.8,
+     sameLayout = TRUE, 
+     layoutGroup = "union",
+     rmSingles = FALSE, 
+     nodeSize = "clr",
+     edgeTranspHigh = 20,
+     labelScale = FALSE,
+     groupNames = c("AAM", "AFR"),
+     hubBorderCol  = "gray40")
+dev.off()
+     
+  
 
 # Quantitative network comparison with permutation
 comp_nationality <- netCompare(props_nationality, 
@@ -120,6 +162,9 @@ plot(diffnet_nationaity)
 # For unadjusted p-value
 plot(diffnet_nationaity, adjusted = FALSE,
      mar = c(2, 2, 5, 15), legendPos = c(1.2,1.2),
+     labelFont=1.5,
+     cexLabels = 0.4,
+     labelScale = FALSE,
      legendArgs = list(bty = "n"),
      legendGroupnames = c("AAM", "AFR"),
      legendTitle = "Correlations:")

@@ -1,3 +1,7 @@
+# This script is from NetComi github 
+# https://github.com/stefpeschel/NetCoMi
+
+
 library(NetCoMi)
 data("amgut1.filt")
 data("amgut2.filt.phy")
@@ -20,7 +24,7 @@ net_spring <- netConstruct(amgut1.filt,
 
 
 props_spring <- netAnalyze(net_spring, 
-                           centrLCC = TRUE,
+                           centrLCC = FALSE,
                            clustMethod = "cluster_fast_greedy",
                            hubPar = "eigenvector",
                            weightDeg = FALSE, normDeg = FALSE)

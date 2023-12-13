@@ -132,6 +132,7 @@ nmds_bc_df <- nmds_bc[[2]]$points[, 1:2]
 
 pcoa_bc_dist <- as.matrix(dist(pcoa_bc_df))
 nmds_bc_dist <- as.matrix(dist(nmds_bc_df))
+
 calculate_stress(as.matrix(bc), pcoa_bc_dist)
 calculate_stress(as.matrix(bc), nmds_bc_dist) # Note: This stress function is not used for nmds
 stressplot(nmds_bc[[2]]) # R^ = 1-Stress^2
