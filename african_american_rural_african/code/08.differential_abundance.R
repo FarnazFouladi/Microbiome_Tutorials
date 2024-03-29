@@ -1,3 +1,7 @@
+# Run the following codes
+source("code/01.load.R")
+source("code/02.import_data.R")
+
 # Create output directory
 output_dir <- "Outputs/Differential_Abundance"
 dir.create(output_dir, recursive = T, showWarnings = F)
@@ -28,14 +32,9 @@ diff_out1 <- ancombc2(
 # Bias corrected abundances
 bias_corrected_df <- diff_out1$bias_correct_log_table
 
-# Replace NAs with the minimum plus half of the minimum (This table will be used for only visualization)
-bias_corrected_df <- apply(bias_corrected_df, 2, function(x) {
-  x[is.na(x)] <- min(x, na.rm = T) + (min(x, na.rm = T) / 2)
-  return(x)
-})
-
 # Structural zeros
 zero_df <- diff_out1$zero_ind
+# Find taxa that in one group are zero abundant but present in another group
 sig_taxa_with_st_zero <- zero_df$taxon[zero_df %>%
   column_to_rownames("taxon") %>%
   rowSums(.) == 1]
@@ -86,7 +85,7 @@ boxplots <- lapply(as.character(res1_sig$taxon), function(taxon) {
 
 
   plot <- ggplot(taxa_meta_merged, aes(y = .data[[as.character(taxon)]], x = .data[["nationality"]])) +
-    geom_boxplot() +
+    geom_boxplot(outlier.shape = NA) +
     geom_jitter(position = position_jitter(width = 0.1), size = 2, alpha = 0.5, aes(color = nationality)) +
     scale_color_brewer(palette = "Dark2") +
     theme_bw() +
@@ -136,8 +135,8 @@ for (nt in c("AAM", "AFR")) {
   outputs_list[[nt]] <- diff_out2
 }
 
-#saveRDS(outputs_list,file = file.path(output_dir,"ancombc2_outputs.rds"))
-outputs_list <- readRDS(file.path(output_dir,"ancombc2_outputs.rds"))
+saveRDS(outputs_list,file = file.path(output_dir,"ancombc2_outputs.rds"))
+#outputs_list <- readRDS(file.path(output_dir,"ancombc2_outputs.rds"))
 
 ## Extract results:
 
@@ -146,12 +145,6 @@ bias_corrected_df <- outputs_list[["AAM"]]$bias_correct_log_table %>%
   rownames_to_column("taxon") %>%
   dplyr::full_join(outputs_list[["AFR"]]$bias_correct_log_table %>% rownames_to_column("taxon")) %>%
   column_to_rownames("taxon")
-
-# Replace NAs with minimum + minimum/2
-bias_corrected_df <- apply(bias_corrected_df, 2, function(x) {
-  x[is.na(x)] <- min(x, na.rm = T) + (min(x, na.rm = T) / 2)
-  return(x)
-})
 
 # Primary results
 res1 <- rbind(outputs_list[["AAM"]]$res, outputs_list[["AFR"]]$res) %>%
